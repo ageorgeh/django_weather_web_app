@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css"
+    integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
+  <title>WeatherApp</title>
+  <style>
+    /* Dark mode style */
+    body {
+      background-color: #121212;
+      color: #fff;
+    }
+
+    .card {
+      background-color: #1e1e1e;
+      border: none;
+      color: #fff;
+    }
+
+    .card-header {
+      background-color: #333;
+      color: #fff;
+    }
+
+    .card-body {
+      background-color: #2c2c2c;
+    }
+
+    .form-control {
+      background-color: #2c2c2c;
+      color: #fff;
+    }
+
+    .btn-primary {
+      background-color: #205185;
+      border: none;
+    }
+
+    .btn-primary:hover {
+      background-color: #205185;
+    }
+
+    .weather-icon {
+      max-width: 200px;
+      max-height: 200px;
+      display: block;
+      margin: 0 auto;
+    }
+
+    .box-container {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 150px;
+    }
+
+    .box {
+      width: 100px;
+      height: 100px;
+      text-align: center;
+      line-height: 100px;
+      font-weight: bold;
+      font-size: 24px;
+      border: 2px solid #000;
+    }
+
+    .circle-box {
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      background-color: #ffcc00;
+      /* Change the background color as desired */
+      color: white;
+      font-size: 12px;
+      text-align: center;
+      line-height: 20px;
+      display: inline-block;
+      margin-left: -30px;
+      /* Adjust the margin as needed to position it next to the UV text */
+    }
+
+    /* Define different background colors based on the value of uv */
+    .uv-low {
+      background-color: #33ff33;
+      /* Green for low UV */
+    }
+
+    .uv-medium {
+      background-color: #ffff33;
+      /* Yellow for medium UV */
+    }
+
+    .uv-high {
+      background-color: #ff9933;
+      /* Orange for high UV */
+    }
+
+    .uv-very-high {
+      background-color: #ff3333;
+      /* Red for very high UV */
+    }
+
+    .uv-extreme {
+      background-color: #9933ff;
+      /* Purple for extreme UV */
+    }
+  </style>
+</head>
+
+<body>
+  <div class="container mt-4">
+    <nav class="navbar navbar-dark bg-dark">
+      <div class="container">
+        <a class="navbar-brand" href="#">WeatherApp</a>
+      </div>
+    </nav>
+    <div class="card mt-4">
+      <h5 class="card-header">Temperature</h5>
+      <div class="card-body">
+        <form method="POST">
+          {% csrf_token %}
+          <div class="form-row">
+            <div class="col">
+              <input name="latitude" id="latitude" required type="text" class="form-control"
+                placeholder="Enter Latitude">
+            </div>
+            <div class="col">
+              <input name="longitude" id="longitude" required type="text" class="form-control"
+                placeholder="Enter Longitude">
+            </div>
+          </div>
+          <button type="button" class="btn btn-primary mt-3" id="get-location-btn">Get My Location</button>
+          <button type="submit" class="btn btn-primary mt-3">Show Temperature</button>
+        </form>
+      </div>
+    </div>
+
+    {% if temp %}
+
+
+    <div class="card mt-4">
+      <div class="card-body">
+        <div class="row">
+          <div class="col-md-6">
+            <strong>Location:</strong> {{ location }}<br>
+            <strong>Condition:</strong> {{ condition_text }}<br>
+            <strong>Local Time:</strong> {{ time }}<br>
+            <strong>Feels Like:</strong> {{ feels_like }}&deg; Celsius<br>
+            <div class="row mt-2">
+              <div class="col-md-3">
+                <strong>UV Level:</strong> {{ uv }}
+              </div>
+              <div class="col-md-3">
+                <span class="circle-box" id="uv-box"></span>
+              </div>
+            </div>
+            <strong>Humidity:</strong> {{ humidity }}%
+            <div class="mt-3">
+              <div style="width: 25%;">
+                <div class="progress" style="height: 10px;">
+                  <div class="progress-bar bg-info" role="progressbar" style="width: {{humidity}}%;" aria-valuemin="0"
+                    aria-valuemax="100"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="col-md-6 text-center">
+            <img src="{{ condition_icon }}" alt="Weather Icon" class="weather-icon"
+              style="width: 300px; height: 300px;">
+          </div>
+        </div>
+        <div class="text-center mt-3">
+          Currently <strong>{{ temp }}&deg; Celsius</strong>
+        </div>
+      </div>
+
+      <script>
+        // Get the UV value from your variable (replace with your actual value)
+        var uv = {{ uv }}; // Example UV value
+
+        // Determine the CSS class based on the UV value
+        var uvClass;
+        if (uv < 3) {
+          uvClass = "uv-low";
+        } else if (uv < 6) {
+          uvClass = "uv-medium";
+        } else if (uv < 8) {
+          uvClass = "uv-high";
+        } else if (uv < 11) {
+          uvClass = "uv-very-high";
+        } else {
+          uvClass = "uv-extreme";
+        }
+
+        // Apply the appropriate class to the box
+        document.getElementById("uv-box").classList.add(uvClass);
+      </script>
+    </div>
+  </div>
+
+
+
+
+
+  {% endif %}
+  </div>
+
+  <script>
+    document.getElementById("get-location-btn").addEventListener("click", function () {
+      if ("geolocation" in navigator) {
+        navigator.geolocation.getCurrentPosition(function (position) {
+          document.getElementById("latitude").value = position.coords.latitude;
+          document.getElementById("longitude").value = position.coords.longitude;
+        });
+      } else {
+        alert("Geolocation is not supported by this browser.");
+      }
+    });
+  </script>
+</body>
+
+</html>
